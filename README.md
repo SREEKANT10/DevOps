@@ -1,4 +1,4 @@
-# DevOps-Project (using terraform only)
+# DevOps-Project (using terraform)
 Using terraform for provisioning manually or using jenkins to automate the process
 <pre>
 1.Login to root account and create iam user account with administrative access
