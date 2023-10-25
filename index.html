@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Project</title>
+    <style>
+        body{
+            background-color: black;
+            color: white;
+        }
+        .about, .para, .architecture-diag{
+            text-align: center;
+        }
+        .pic{
+            width: 60%;
+        }
+        li{
+            font-size: large;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="about">
+      <h1>Hosting Web Application on Amazon EC2</h1>
+      <h2>using Terraform, Docker and Nginx server</h2>
+    </div>
+    <div class="para">
+      <h3>
+        This project hosts the current page on Nginx server using Docker on port
+        8000
+      </h3>
+      <h3>using Amazon EC2 instance configured using Terraform.</h3>
+    </div>
+    <div class="architecture-diag">
+      <img class="pic" src=" https://drive.google.com/uc?export=view&id=" alt="architecture-diag" />
+    </div>
+    <div class="procedures">
+      <h2>
+        The step by step procedure along with the screenshots are given below:
+      </h2>
+
+      <ol>
+        <li>
+          Login to root account and create iam user account with administrative
+          access.
+        </li>
+        <br>
+        <img class="pic" src=" https://drive.google.com/uc?export=view&id=1DUCgIrGYpMk9iu8QgHQBq9rp7_-i7ZKy" alt="img1" />
+        <br>
+        <li>Create a key pair “devops_01.ppk” in iam user account.</li>
+        <br>
+        <img class="pic" src=" https://drive.google.com/uc?export=view&id=1ndeHIVC2NALpLEiQzQwJUlcPT2_LZfy6" alt="img2" />
+        <br>
+        <li>
+          Create access keys for iam account add the access_key and secret_key
+          in .tf file.
+        </li>
+        <br>
+        <img class="pic" src=" https://drive.google.com/uc?export=view&id=1sSUrXUXbGX7izPRAeewDWZZxmE4qQsvR" alt="img3" />
+        <br><li>Create project directory.</li>
+        <br><li>Create main.tf file.</li>
+        <br><li>Add the content:</li>
+        <br><pre>
+    provider "aws" {
+    region = "us-east-1"
+    access_key = "AKIAZXXXXXXXXXX2DOM"
+    secret_key = "cyaDF7xxxxxxxxxxxxxxxxxzHZndms"
+    }
+
+    variable "name" {
+    description = "Name the instance on deploy"
+    }
+
+    resource "aws_instance" "devops_01_docker-nginx" {
+    ami = "ami-0889a44b331db0194"
+    instance_type = "t2.micro"
+    key_name = "devops_01"
+    tags = {
+        Name = "${var.name}"
+    }
+
+    user_data = <<-EOF
+    #!/bin/bash
+    set -ex
+    sudo yum update -y
+    sudo yum install -y yum-utils
+    sudo yum install docker -y
+    sudo service docker start
+    sudo usermod -a -G docker ec2-user
+    sudo curl -L https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+    EOF
+    }
+        </pre>
+        
+        <br><img class="pic" src=" https://drive.google.com/uc?export=view&id=1yLoflfTcT5jqTuF3ksYoEgugEFdAnoFY" alt="img4">
+        <br><li>Open Command prompt and move to the project directory</li>
+        <br><li>Run terraform init, terraform plan and terraform apply</li>
+        <br><img class="pic" src=" https://drive.google.com/uc?export=view&id=1B4NfPwIDl7_bCtyc9VB3ZVJr5MQxhanq" alt="img5">
+        <br><img class="pic" src=" https://drive.google.com/uc?export=view&id=1ZgY9fnUSiTbhgkrdFC0zwVP-QYsKCnE7" alt="img6">
+        <br><img class="pic" src=" https://drive.google.com/uc?export=view&id=1VPr8JeYSmUiV4_tXTj9hbPjMU8bkJVXW" alt="img7">
+        <br><li>Once the ec2 instance gets started, copy its public dns address.</li>
+        <br><li>Open putty.exe to connect through ssh client.</li>
+        <br><li>Using the DNS address and keypair file connect to the instance.</li>
+        
+        <br><img class="pic" src=" https://drive.google.com/uc?export=view&id=1T7uGVhDKTefIpfvFKwBozJBcCJxDt0q9" alt="img8">
+        <br><li>Run the command 'docker ps' to check whether docker is running or not.</li>
+        <br><img class="pic" src=" https://drive.google.com/uc?export=view&id=1TGiAVoNCEyyxHTIw-dtrV7XMQZy-2i5F" alt="img9">
+        <br><li>Use 'docker pull nginx:latest' to download Nginx image</li>
+        <br><li>Create a new folder for html file 
+            
+            <br><pre>
+    Run following commands:
+    a)mkdir nginx-html
+    b)cd nginx-html
+    c)touch index.html
+    d)nano index.html
+    e)paste file contents to display
+            </pre>
+            <br>
+        </li>
+        
+        <br><li>Run below command to run the nginx image on docker host on port 8000 ( Add 8000 in EC2 Security Group inbound rules)
+            <pre>
+    docker run -d -p 8000:80 -v ~/nginx-html:/usr/share/nginx/html --name hosting nginx
+            </pre>
+        
+        <br></li>
+        <img class="pic" src=" https://drive.google.com/uc?export=view&id=1DrW8Re0l39WhjGu20MLi1dDfv4zbDh3f" alt="img10">
+        <br>
+        <li>Paste the EC2 instance DNS address into the browser, set port to 8000 and see the results.</li>
+        <br>
+        <img class="pic" src=" https://drive.google.com/uc?export=view&id=1PS_ku8Kc0cMuVR5HadQc141f9GjmzT6y" alt="img11">
+        <li>Run docker stop --docker name-- to stop running container. </li>
+        
+        <br><li>Run terraform destroy to delete all the resources.</li>
+    </ol>
+
+    <ul> Team Members:
+        <li>Prakhar Kunvar Sinha (RA2011003010093)</li>
+        <li>Sreekant Nair (RA2011003010096)</li>
+        <li>Aniket Mishra (RA2011003010098)</li>
+        <li>BBSM Krishna (RA2011003010109)</li>
+    </ul>
+    </div>
+  </body>
+</html>
